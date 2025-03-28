@@ -1,8 +1,0 @@
-# Verible outputs
-verible/
-
-# Verilator outputs
-obj_dir/
-dump.vcd
-coverage.dat
-coverage_annotated/
