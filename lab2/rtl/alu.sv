@@ -8,7 +8,7 @@
 
 module alu #(
     parameter int XLen = 32,
-    parameter int NOps = 5,
+    parameter int NOps = 6,
     localparam int NOpsWidth = $clog2(NOps)
 ) (
     input  logic [XLen-1:0] a_i,
