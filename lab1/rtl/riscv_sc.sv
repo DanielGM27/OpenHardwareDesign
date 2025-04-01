@@ -33,7 +33,7 @@ logic [2:0] ALUControl;
 
 always_comb begin : mainDecoder
     unique case (op)
-        7b'0000011: begin
+        7'b0000011: begin
             ResultSrc = '1;
             MemWrite = '0;
             ALUSrc = '1;
@@ -42,7 +42,7 @@ always_comb begin : mainDecoder
             Branch = '0;
             ALUOp = 2'b00;
         end
-        7b'0100011: begin
+        7'b0100011: begin
             ResultSrc = '0;
             MemWrite = '1;
             ALUSrc = '1;
@@ -51,7 +51,7 @@ always_comb begin : mainDecoder
             Branch = '0;
             ALUOp = 2'b00;
         end
-        7b'0110011: begin
+        7'b0110011: begin
             ResultSrc = '0;
             MemWrite = '0;
             ALUSrc = '0;
@@ -60,7 +60,7 @@ always_comb begin : mainDecoder
             Branch = '0;
             ALUOp = 2'b10;
         end
-        7b'1100011: begin
+        7'b1100011: begin
             ResultSrc = '0;
             MemWrite = '0;
             ALUSrc = '0;
@@ -69,12 +69,32 @@ always_comb begin : mainDecoder
             Branch = '1;
             ALUOp = 2'b01;
         end
-        default: 
+        default: ;
     endcase
 end
 
 always_comb begin : ALUDecoder
-    
+    unique case (op)
+        7'b0000011: ALUControl = 3'b000;
+        7'b0100011: ALUControl = 3'b000;
+        7'b0110011: begin
+            unique case (funct3)
+                3'b000: begin
+                    if (funct7 == 7'b0000000) begin
+                        ALUControl = 3'b000;
+                    end else begin
+                        ALUControl = 3'b001;
+                    end
+                end
+                3'b111: ALUControl = 3'b010;
+                3'b110: ALUControl = 3'b011;
+                3'b010: ALUControl = 3'b101;
+                default: ;
+            endcase
+        end
+        7'b1100011: ALUControl = 3'b001;
+        default: ;
+    endcase
 end
 
 endmodule
