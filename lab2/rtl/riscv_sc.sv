@@ -18,20 +18,26 @@ output logic dmem_we_o,
 output logic [XLen-1:0] dmem_wdata_o
 );
 
+logic [XLen-1:0] instruction;
 logic [6:0] op;
 logic ResultSrc;
 logic MemWrite;
 logic ALUSrc;
 logic [1:0] ImmSrc;
+logic []
 logic RegWrite;
 logic [1:0] ALUOp;
 logic Branch;
 
 logic [2:0] funct3;
-logic [6:0] funct7;
+logic funct7;
 logic [2:0] ALUControl;
 
-always_comb begin : mainDecoder
+assign op = instruction[6:0];
+assign funct3 = instruction[14:12];
+assign funct7 = instruction[30];
+
+always_comb begin : MainDecoder
     unique case (op)
         7'b0000011: begin
             ResultSrc = '1;
@@ -79,13 +85,8 @@ always_comb begin : ALUDecoder
         7'b0100011: ALUControl = 3'b000;
         7'b0110011: begin
             unique case (funct3)
-                3'b000: begin
-                    if (funct7 == 7'b0000000) begin
-                        ALUControl = 3'b000;
-                    end else begin
-                        ALUControl = 3'b001;
-                    end
-                end
+                3'b000: ALUControl = (funct7 == '0)? 3'b000 : 3'b001;
+
                 3'b111: ALUControl = 3'b010;
                 3'b110: ALUControl = 3'b011;
                 3'b010: ALUControl = 3'b101;
