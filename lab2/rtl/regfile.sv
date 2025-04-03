@@ -28,9 +28,9 @@ module regfile #(
     // Synchronous write
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin
-            rf <= '{default: '0};
+            rf = '{default: '0};
         end else if (we3_i) begin
-            rf[a3_i] <= wd3_i;
+            rf[a3_i] = wd3_i;
         end
     end
 

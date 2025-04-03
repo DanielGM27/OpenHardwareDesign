@@ -24,7 +24,7 @@ module ram #(
     // Synchronous write
     always_ff @(posedge clk_i) begin
         if (we_i) begin
-            mem[a_i] <= wd_i;
+            mem[a_i] = wd_i;
         end
     end
 
