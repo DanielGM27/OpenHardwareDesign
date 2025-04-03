@@ -7,7 +7,7 @@
 #  addi, beq
 
 #       RISC-V Assembly         Description               Address   Machine Code
-main:   addi x2, x0, 5          # x2 = 5                  0         00500113
-        addi x3, x0, 10
-        add x4, x2, x3
+main:   lui x2, 8               # x2 = 5                  0         00500113
+        ori x3, x0, -20
+        add x2, x2, x3
 done:   beq  x2, x2, done       # infinite loop           4        00210063

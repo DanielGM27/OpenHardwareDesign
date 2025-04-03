@@ -128,6 +128,9 @@ always_comb begin : MainDecoder
         //lui
         7'b0110111: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp} = 10'b0_0_1_100_1_0_00;
         
+        //jal
+        7'b1101111: //TODO;
+
         default: ;
     endcase
 end
@@ -146,7 +149,7 @@ always_comb begin : ALUDecoder
         //Look at funct code
         2'b10: begin
             unique case (funct3)
-                3'b000: ALUControl = (funct7 == '0)? 3'b000 : 3'b001;   // Add/Sub
+                3'b000: ALUControl = (funct7 == 1'b0 | ALUSrc == 1'b1)? 3'b000 : 3'b001; // Add/Sub
                 3'b111: ALUControl = 3'b010;                            // AND
                 3'b110: ALUControl = 3'b011;                            // OR
                 3'b010: ALUControl = 3'b101;                            // SLT
@@ -187,9 +190,9 @@ assign PCPlus4 = PC + 4;
 assign PCTarget = PC + immExt;
 assign PCNext = (PCSrc)? PCTarget : PCPlus4;
 
-always_ff @(posedge clk_i or negedge rst_ni) begin
-    if (!rst_ni) PC = 32'b0;
-    else PC = PCNext;
+always_ff @(posedge clk_i) begin
+    if (!rst_ni) PC <= 32'b0;
+    else PC <= PCNext;
 end
 
 assign pmem_addr_o = PC;
