@@ -1,6 +1,9 @@
+.vscode/
+
 verible/
 coverage_annotated/
 obj_dir/
 
 *.dat
 *.vcd
+
