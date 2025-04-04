@@ -11,9 +11,9 @@ module alu #(
     parameter int NOps = 6,
     localparam int NOpsWidth = $clog2(NOps)
 ) (
-    input  logic [XLen-1:0] a_i,
-    input  logic [XLen-1:0] b_i,
-    input  logic [NOpsWidth-1:0] alu_control_i,
+    input logic [XLen-1:0] a_i,
+    input logic [XLen-1:0] b_i,
+    input logic [NOpsWidth-1:0] alu_control_i,
     output logic [XLen-1:0] result_o,
     output logic zero_o
 );
@@ -40,17 +40,17 @@ module alu #(
         result_o = '0;
         unique case (alu_control_i)
             // ADD
-            'b000: result_o = sum;
+            'b000:   result_o = sum;
             // SUB
-            'b001: result_o = sum;
+            'b001:   result_o = sum;
             // AND
-            'b010: result_o = a_i & b_i;
+            'b010:   result_o = a_i & b_i;
             // OR
-            'b011: result_o = a_i | b_i;
+            'b011:   result_o = a_i | b_i;
             // XOR
-            'b100: result_o = a_i ^ b_i;
+            'b100:   result_o = a_i ^ b_i;
             // SLT
-            'b101: result_o = sum[XLen-1] ^ v;
+            'b101:   result_o = sum[XLen-1] ^ v;
             // Undefined, use default value from above
             default: ;
         endcase
