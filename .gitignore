@@ -3,6 +3,7 @@
 verible/
 coverage_annotated/
 obj_dir/
+build/
 
 *.dat
 *.vcd
