@@ -30,6 +30,9 @@ logic [1:0] ALUOp;
 logic Branch;
 logic PCSrc;
 
+//Control Unit Signal Extension for Jump instruction
+logic Jump;
+
 logic [2:0] funct3;
 logic funct7;
 
@@ -50,6 +53,7 @@ logic [XLen-1:0] Result;
 logic [ILen-1:0] a1_i;
 logic [ILen-1:0] a2_i;
 logic [ILen-1:0] a3_i;
+logic [XLen-1:0] wd3_i;
 logic [XLen-1:0] rd1_o;
 logic [XLen-1:0] rd2_o;
 
@@ -73,6 +77,9 @@ assign funct7 = instruction[30];
 //Result Mux
 assign Result = (ResultSrc)? dmem_rdata_i : ALUResult;
 
+//WData Mux
+assign wd3_i = (Jump)? PCPlus4 : Result;
+
 //Instanciación del Register File
 regfile #(
     .XLen(XLen),
@@ -84,7 +91,7 @@ regfile #(
     .a2_i(a2_i),
     .a3_i(a3_i),
     .we3_i(RegWrite),
-    .wd3_i(Result),
+    .wd3_i(wd3_i),
     .rd1_o(rd1_o),
     .rd2_o(rd2_o)
 );
@@ -111,25 +118,25 @@ assign dmem_we_o = MemWrite;
 always_comb begin : MainDecoder
     unique case (op)
         //lw
-        7'b0000011: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp} = 10'b1_0_1_000_1_0_00; 
+        7'b0000011: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp, Jump} = 11'b1_0_1_000_1_0_00_0; 
         
         //sw
-        7'b0100011: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp} = 10'b0_1_1_010_0_0_00; 
+        7'b0100011: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp, Jump} = 11'b0_1_1_001_0_0_00_0; 
         
         //R-type
-        7'b0110011: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp} = 10'b0_0_0_000_1_0_10;
+        7'b0110011: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp, Jump} = 11'b0_0_0_000_1_0_10_0;
 
         //I-type
-        7'b0010011: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp} = 10'b0_0_1_000_1_0_10;
+        7'b0010011: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp, Jump} = 11'b0_0_1_000_1_0_10_0;
         
         //beq
-        7'b1100011: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp} = 10'b0_0_0_010_0_1_01;
+        7'b1100011: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp, Jump} = 11'b0_0_0_010_0_1_01_0;
 
         //lui
-        7'b0110111: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp} = 10'b0_0_1_100_1_0_00;
+        7'b0110111: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp, Jump} = 11'b0_0_1_100_1_0_00_0;
         
         //jal
-        7'b1101111: //TODO;
+        7'b1101111: {ResultSrc, MemWrite, ALUSrc, ImmSrc, RegWrite, Branch, ALUOp, Jump} = 11'b0_0_0_011_1_0_00_1;
 
         default: ;
     endcase
@@ -148,12 +155,12 @@ always_comb begin : ALUDecoder
 
         //Look at funct code
         2'b10: begin
-            unique case (funct3)
-                3'b000: ALUControl = (funct7 == 1'b0 | ALUSrc == 1'b1)? 3'b000 : 3'b001; // Add/Sub
-                3'b111: ALUControl = 3'b010;                            // AND
-                3'b110: ALUControl = 3'b011;                            // OR
-                3'b010: ALUControl = 3'b101;                            // SLT
-                3'b100: ALUControl = 3'b100;                            // XOR
+            unique case (funct3)    //Si la funct3 corresponde a suma/resta comprobar ALUSrc para que aplique a add y addi
+                3'b000: ALUControl = (funct7 == 1'b0 | ALUSrc == 1'b1)? 3'b000 : 3'b001;    // Add/Sub
+                3'b111: ALUControl = 3'b010;                                                // AND
+                3'b110: ALUControl = 3'b011;                                                // OR
+                3'b010: ALUControl = 3'b101;                                                // SLT
+                3'b100: ALUControl = 3'b100;                                                // XOR
                 default: ;
             endcase
         end
@@ -188,7 +195,7 @@ assign dmem_wdata_o = rd2_o;
 //PC Related Variables Assignment
 assign PCPlus4 = PC + 4;
 assign PCTarget = PC + immExt;
-assign PCNext = (PCSrc)? PCTarget : PCPlus4;
+assign PCNext = (PCSrc | Jump)? PCTarget : PCPlus4;
 
 always_ff @(posedge clk_i) begin
     if (!rst_ni) PC <= 32'b0;
