@@ -27,7 +27,7 @@ module alu #(
     // Compute /B to have A - B = A + /B + 1
     assign not_b = alu_control_i[0] ? ~b_i : b_i;
     // Implement adder
-    assign sum = a_i + not_b + alu_control_i[0];
+    assign sum = a_i + not_b + {31'b0, alu_control_i[0]};
     // Detect if the operation uses the adder (for overflow checks)
     //     'b000 -> +, 'b001 -> -, 'b101 -> -, 'b100 -> don't care : 'bx0x
     // assign is_adder = ~alu_control_i[1];
@@ -51,7 +51,7 @@ module alu #(
             // XOR
             'b100:   result_o = a_i ^ b_i;
             // SLT
-            'b101:   result_o = sum[XLen-1] ^ v;
+            'b101:   result_o = {31'b0, sum[XLen-1] ^ v};
             // Undefined, use default value from above
             default: ;
         endcase
