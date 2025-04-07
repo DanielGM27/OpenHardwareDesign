@@ -11,11 +11,11 @@ module ram #(
     parameter int NPos = 1024,
     localparam int NPosWidth = $clog2(NPos)
 ) (
-    input  logic clk_i,
+    input  logic                 clk_i,
     input  logic [NPosWidth-1:0] a_i,
-    input  logic we_i,
-    input  logic [XLen-1:0] wd_i,
-    output logic [XLen-1:0] rd_o
+    input  logic                 we_i,
+    input  logic [     XLen-1:0] wd_i,
+    output logic [     XLen-1:0] rd_o
 );
 
     // Memory (unpacked array)
@@ -24,7 +24,7 @@ module ram #(
     // Synchronous write
     always_ff @(posedge clk_i) begin
         if (we_i) begin
-            mem[a_i] = wd_i;
+            mem[a_i] <= wd_i;
         end
     end
 
