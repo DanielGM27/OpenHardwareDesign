@@ -8,163 +8,163 @@ module rv32i_multicycle #(
     input logic rst_ni
 );
 
-    logic [ILen-1:0] PC;
-    logic [ILen-1:0] OldPC;
-    logic [XLen-1:0] PCNext;
-    logic PCWrite;
+  logic [ILen-1:0] pc;
+  logic [ILen-1:0] old_pc;
+  logic [XLen-1:0] pc_next;
+  logic pc_write;
 
-    logic AddrSrc;
-    logic [Addr-1:0] Addr;
+  logic addr_src;
+  logic [AddrWidth-1:0] addr;
 
-    logic [ILen-1:0] instr;
+  logic [ILen-1:0] instr;
 
-    logic MemWrite;
-    logic [XLen-1:0] WriteData;
-    logic [XLen-1:0] ReadData;
-    logic [XLen-1:0] Data;
+  logic mem_write;
+  logic [XLen-1:0] write_data;
+  logic [XLen-1:0] read_data;
+  logic [XLen-1:0] data;
 
-    logic IRWrite;
-    logic RegWrite;
-    logic [2:0] ImmSrc;
-    logic [1:0] ALUSrcA;
-    logic [1:0] ALUSrcB;
-    logic [2:0] ALUControl;
-    logic [1:0] ResultSrc;
+  logic ir_write;
+  logic reg_write;
+  logic [2:0] imm_src;
+  logic [1:0] alu_src_a;
+  logic [1:0] alu_src_b;
+  logic [2:0] alu_control;
+  logic [1:0] result_src;
 
-    logic [ILen-1:0] ImmExt;
+  logic [ILen-1:0] imm_ext;
 
-    logic Zero;
+  logic zero;
 
-    logic [XLen-1:0] A;
-    logic [XLen-1:0] SrcA;
-    logic [XLen-1:0] SrcB;
-    logic [XLen-1:0] ALUResult;
-    logic [XLen-1:0] ALUOut;
-    logic [XLen-1:0] Result;
+  logic [XLen-1:0] a;
+  logic [XLen-1:0] src_a;
+  logic [XLen-1:0] src_b;
+  logic [XLen-1:0] alu_result;
+  logic [XLen-1:0] alu_out;
+  logic [XLen-1:0] result;
 
-    logic [XLen-1:0] rd1;
-    logic [XLen-1:0] rd2;
+  logic [XLen-1:0] rd1;
+  logic [XLen-1:0] rd2;
 
-    alu_control alu_control_i (
-        .clk_i(clk_i),
-        .rst_ni(rst_ni),
-        .op_i(instr[6:0]),
-        .funct3_i(instr[14:12]),
-        .funct7_i(instr[30]),
-        .zero_i(Zero),
-        .pc_write_o(PCWrite),
-        .addr_src_o(AddrSrc),
-        .mem_write_o(MemWrite),
-        .ir_write_o(IRWrite),
-        .result_src_o(ResultSrc),
-        .alu_control_o(ALUControl),
-        .alu_src_a_o(ALUSrcA),
-        .alu_src_b_o(ALUSrcB),
-        .imm_src_o(ImmSrc),
-        .reg_write_o(RegWrite)
-    );
+  alu_control alu_control_i (
+      .clk_i        (clk_i),
+      .rst_ni       (rst_ni),
+      .op_i         (instr[6:0]),
+      .funct3_i     (instr[14:12]),
+      .funct7_i     (instr[30]),
+      .zero_i       (zero),
+      .pc_write_o   (pc_write),
+      .addr_src_o   (addr_src),
+      .mem_write_o  (mem_write),
+      .ir_write_o   (ir_write),
+      .result_src_o (result_src),
+      .alu_control_o(alu_control),
+      .alu_src_a_o  (alu_src_a),
+      .alu_src_b_o  (alu_src_b),
+      .imm_src_o    (imm_src),
+      .reg_write_o  (reg_write)
+  );
 
-    ram #(
-        .XLen(XLen),
-        .NPos(1024)
-    ) mem_ram_i (
-        .clk_i(clk_i),
-        .a_i  (Addr),
-        .we_i (MemWrite),
-        .wd_i (WriteData),
-        .rd_o (ReadData)
-    );
+  ram #(
+      .XLen(XLen),
+      .NPos(1024)
+  ) mem_ram_i (
+      .clk_i(clk_i),
+      .a_i  (addr),
+      .we_i (mem_write),
+      .wd_i (write_data),
+      .rd_o (read_data)
+  );
 
-    regfile #(
-        .XLen(XLen),
-        .NReg(XLen)
-    ) regfile_i (
-        .clk_i (clk_i),
-        .rst_ni(rst_ni),
-        .a1_i  (instr[19:15]),
-        .a2_i  (instr[24:20]),
-        .a3_i  (instr[11:7]),
-        .we3_i (RegWrite),
-        .wd3_i (Result),
-        .rd1_o (rd1),
-        .rd2_o (rd2)
-    );
+  regfile #(
+      .XLen(XLen),
+      .NReg(XLen)
+  ) regfile_i (
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
+      .a1_i  (instr[19:15]),
+      .a2_i  (instr[24:20]),
+      .a3_i  (instr[11:7]),
+      .we3_i (reg_write),
+      .wd3_i (result),
+      .rd1_o (rd1),
+      .rd2_o (rd2)
+  );
 
-    sign_extend #(
-        .ILen(ILen)
-    ) sign_extend_i (
-        .instr_i  (instr),
-        .imm_src_i(ImmSrc),
-        .imm_ext_o(ImmExt)
-    );
+  sign_extend #(
+      .ILen(ILen)
+  ) sign_extend_i (
+      .instr_i  (instr),
+      .imm_src_i(imm_src),
+      .imm_ext_o(imm_ext)
+  );
 
-    alu #(
-        .XLen(XLen),
-        .NOps(6)
-    ) alu_i (
-        .a_i(SrcA),
-        .b_i(SrcB),
-        .alu_control_i(ALUControl),
-        .result_o(ALUResult),
-        .zero_o(Zero)
-    );
+  alu #(
+      .XLen(XLen),
+      .NOps(6)
+  ) alu_i (
+      .a_i          (src_a),
+      .b_i          (src_b),
+      .alu_control_i(alu_control),
+      .result_o     (alu_result),
+      .zero_o       (zero)
+  );
 
-    always_ff @(posedge clk_i) begin : AluReg
-        ALUOut <= ALUResult;
+  always_ff @(posedge clk_i) begin : alu_reg
+    alu_out <= alu_result;
+  end
+
+  always_comb begin : alu_mux
+    result = alu_out;
+    unique case (result_src)
+      2'b00:   result = alu_out;
+      2'b01:   result = data;
+      2'b10:   result = alu_result;
+      default: ;
+    endcase
+  end
+
+  always_comb begin : src_a_mux
+    unique case (alu_src_a)
+      2'b00:   src_a = pc;
+      2'b01:   src_a = old_pc;
+      2'b10:   src_a = a;
+      default: ;
+    endcase
+  end
+
+  always_comb begin : src_b_mux
+    unique case (alu_src_b)
+      2'b00:   src_b = write_data;
+      2'b01:   src_b = imm_ext;
+      2'b10:   src_b = 4;
+      default: ;
+    endcase
+  end
+
+  always_ff @(clk_i) begin : reg_filereg
+    a <= rd1;
+    write_data <= rd2;
+  end
+
+  always_ff @(clk_i) begin
+    data <= read_data;
+  end
+
+  always_ff @(clk_i) begin : instruction_reg
+    if (ir_write) begin
+      old_pc <= pc;
+      instr  <= read_data;
     end
+  end
 
-    always_comb begin : ALUMux
-        Result = ALUOut;
-        unique case (ResultSrc)
-            2'b00:   Result = ALUOut;
-            2'b01:   Result = Data;
-            2'b10:   Result = ALUResult;
-            default: ;
-        endcase
+  always_ff @(clk_i) begin : pc_reg
+    if (pc_write) begin
+      pc <= pc_next;
     end
+  end
 
-    always_comb begin : SrcAMux
-        unique case (ALUSrcA)
-            2'b00:   SrcA = PC;
-            2'b01:   SrcA = OldPC;
-            2'b10:   SrcA = A;
-            default: ;
-        endcase
-    end
+  assign addr = (addr_src) ? result : pc;
 
-    always_comb begin : SrcBMux
-        unique case (ALUSrcB)
-            2'b00:   SrcB = WriteData;
-            2'b01:   SrcB = ImmExt;
-            2'b10:   SrcB = 4;
-            default: ;
-        endcase
-    end
-
-    always_ff @(clk_i) begin : RegfileReg
-        A <= rd1;
-        WriteData <= rd2;
-    end
-
-    always_ff @(clk_i) begin
-        Data <= ReadData;
-    end
-
-    always_ff @(clk_i) begin : InstrReg
-        if (IRWrite) begin
-            OldPC <= PC;
-            instr <= ReadData;
-        end
-    end
-
-    always_ff @(clk_i) begin : PCReg
-        if (PCWrite) begin
-            PC <= PCNext;
-        end
-    end
-
-    assign Addr   = (AddrSrc) ? Result : PC;
-
-    assign PCNext = Result;
+  assign pc_next = result;
 
 endmodule

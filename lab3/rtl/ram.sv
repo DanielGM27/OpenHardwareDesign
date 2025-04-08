@@ -18,17 +18,17 @@ module ram #(
     output logic [     XLen-1:0] rd_o
 );
 
-    // Memory (unpacked array)
-    logic [XLen-1:0] mem[NPos];
+  // Memory (unpacked array)
+  logic [XLen-1:0] mem[NPos];
 
-    // Synchronous write
-    always_ff @(posedge clk_i) begin
-        if (we_i) begin
-            mem[a_i] <= wd_i;
-        end
+  // Synchronous write
+  always_ff @(posedge clk_i) begin
+    if (we_i) begin
+      mem[a_i] <= wd_i;
     end
+  end
 
-    // Asynchronous read
-    assign rd_o = mem[a_i];
+  // Asynchronous read
+  assign rd_o = mem[a_i];
 
 endmodule

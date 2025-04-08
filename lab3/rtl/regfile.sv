@@ -22,20 +22,20 @@ module regfile #(
     output logic [     XLen-1:0] rd2_o
 );
 
-    // Register file (unpacked array)
-    logic [XLen-1:0] rf[NReg];
+  // Register file (unpacked array)
+  logic [XLen-1:0] rf[NReg];
 
-    // Synchronous write
-    always_ff @(posedge clk_i or negedge rst_ni) begin
-        if (!rst_ni) begin
-            rf <= '{default: '0};
-        end else if (we3_i) begin
-            rf[a3_i] <= wd3_i;
-        end
+  // Synchronous write
+  always_ff @(posedge clk_i or negedge rst_ni) begin
+    if (!rst_ni) begin
+      rf <= '{default: '0};
+    end else if (we3_i) begin
+      rf[a3_i] <= wd3_i;
     end
+  end
 
-    // Asynchronous read
-    assign rd1_o = (a1_i != '0) ? rf[a1_i] : '0;
-    assign rd2_o = (a2_i != '0) ? rf[a2_i] : '0;
+  // Asynchronous read
+  assign rd1_o = (a1_i != '0) ? rf[a1_i] : '0;
+  assign rd2_o = (a2_i != '0) ? rf[a2_i] : '0;
 
 endmodule
