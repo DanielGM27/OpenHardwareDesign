@@ -16,7 +16,8 @@ module tb_sign_extend;
   );
 
   // Function to calculate expected result
-  function automatic [ILen-1:0] calc_expected(input [ILen-1:0] instr, input [2:0] imm_src);
+  function automatic [ILen-1:0] calc_expected(input logic [ILen-1:0] instr,
+                                              input logic [2:0] imm_src);
     case (imm_src)
       3'b000:  return {{20{instr[31]}}, instr[31:20]};  // I-Type
       3'b001:  return {{20{instr[31]}}, instr[31:25], instr[11:7]};  // S-Type
@@ -30,7 +31,7 @@ module tb_sign_extend;
   endfunction
 
   // Task to run a test
-  task run_test(input [ILen-1:0] instr, input [2:0] imm_src);
+  task automatic run_test(input logic [ILen-1:0] instr, input logic [2:0] imm_src);
     logic [ILen-1:0] expected;
     begin
       instr_i   = instr;

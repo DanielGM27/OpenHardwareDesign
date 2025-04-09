@@ -32,8 +32,8 @@ module alu #(
   //     'b000 -> +, 'b001 -> -, 'b101 -> -, 'b100 -> don't care : 'bx0x
   // assign is_adder = ~alu_control_i[1];
   //     'b000 -> +, 'b001 -> -, 'b101 -> - : 'b000 | 'b001 | 'b101 | 'b001
-  assign is_adder = (~alu_control_i[2] & ~alu_control_i[1]) |
-      (~alu_control_i[1] & alu_control_i[0]);
+  assign
+      is_adder = (~alu_control_i[2] & ~alu_control_i[1]) | (~alu_control_i[1] & alu_control_i[0]);
 
   // Core functionality
   always_comb begin
@@ -60,7 +60,7 @@ module alu #(
   // Zero flag
   assign zero_o = (result_o == '0);
   // Overflow flag (internal)
-  assign v = is_adder & (a_i[XLen-1] ^ sum[XLen-1]) & ~(
-      a_i[XLen-1] ^ b_i[XLen-1] ^ alu_control_i[0]);
+  assign
+      v = is_adder & (a_i[XLen-1] ^ sum[XLen-1]) & ~(a_i[XLen-1] ^ b_i[XLen-1] ^ alu_control_i[0]);
 
 endmodule

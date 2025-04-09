@@ -171,7 +171,8 @@ module alu_control (
 
       //Look at funct code
       2'b10: begin
-        unique case (funct3_i)  //Si la funct3 corresponde a suma/resta comprobar ALUSrc para que aplique a add y addi
+        //Si la funct3 corresponde a suma/resta comprobar ALUSrc para que aplique a add y addi
+        unique case (funct3_i)
           3'b000:
           alu_control_o = (funct7_i == 1'b0 | alu_src_b_o == 2'b01) ? 3'b000 : 3'b001;  // Add/Sub
           3'b111: alu_control_o = 3'b010;  // AND
@@ -191,8 +192,8 @@ module alu_control (
     unique case (op_i)
 
       7'b0000011: imm_src_o = 3'b000;  //lw
-      7'b0100011: imm_src_o = 3'b001;  //sw            
-      7'b0110011: imm_src_o = 3'b000;  //R-Type            
+      7'b0100011: imm_src_o = 3'b001;  //sw
+      7'b0110011: imm_src_o = 3'b000;  //R-Type
       7'b1100011: imm_src_o = 3'b010;  //beq
       7'b0010011: imm_src_o = 3'b000;  //I-type ALU
       7'b1101111: imm_src_o = 3'b011;  //jal

@@ -1,0 +1,15 @@
+./rtl/alu.sv
+./rtl/alu_control.sv
+./rtl/ram.sv
+./rtl/regfile.sv
+./rtl/rv32i_multicycle.sv
+./rtl/sign_extend.sv
+./tb/tb_alu.sv
+./tb/tb_alu_control.sv
+./tb/tb_ram.sv
+./tb/tb_regfile.sv
+./tb/tb_sign_extend.sv
+./verif/prop_alu.sv
+./verif/prop_alu_control.sv
+./verif/prop_ram.sv
+./verif/prop_regfile.sv
