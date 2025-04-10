@@ -69,7 +69,7 @@ module tb_alu_control;
 
     rst_n = 1'b0;
 
-    //SW INSTRUCTION
+    //LW INSTRUCTION
     instr = 32'h00A02083;
 
     op = instr[6:0];
