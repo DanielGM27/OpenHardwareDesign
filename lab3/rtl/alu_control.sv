@@ -21,7 +21,7 @@ module alu_control (
   logic branch;
   logic pc_update;
 
-  typedef enum logic [3:0] {
+  typedef enum {
     StFetch,
     StDecode,
     StMemAddr,
@@ -29,11 +29,11 @@ module alu_control (
     StMemWB,
     StMemWrite,
     StExecuteR,
-    StExecuteI,
-    StExecuteU,
     StALUWB,
+    StExecuteI,
+    StJAL,
     StBEQ,
-    StJAL
+    StExecuteU
   } state_e;
 
   state_e state_d, state_q;
@@ -71,6 +71,7 @@ module alu_control (
           7'b0010011:             state_d = StExecuteI;
           7'b1101111:             state_d = StJAL;
           7'b1100011:             state_d = StBEQ;
+          7'b0110111:             state_d = StExecuteU;
           default:                ;
         endcase
       end
@@ -171,7 +172,8 @@ module alu_control (
 
       //Look at funct code
       2'b10: begin
-        unique case (funct3_i)  //Si la funct3 corresponde a suma/resta comprobar ALUSrc para que aplique a add y addi
+        //Si la funct3 corresponde a suma/resta comprobar ALUSrc para que aplique a add y addi
+        unique case (funct3_i)
           3'b000:
           alu_control_o = (funct7_i == 1'b0 | alu_src_b_o == 2'b01) ? 3'b000 : 3'b001;  // Add/Sub
           3'b111: alu_control_o = 3'b010;  // AND
@@ -191,8 +193,8 @@ module alu_control (
     unique case (op_i)
 
       7'b0000011: imm_src_o = 3'b000;  //lw
-      7'b0100011: imm_src_o = 3'b001;  //sw            
-      7'b0110011: imm_src_o = 3'b000;  //R-Type            
+      7'b0100011: imm_src_o = 3'b001;  //sw
+      7'b0110011: imm_src_o = 3'b000;  //R-Type
       7'b1100011: imm_src_o = 3'b010;  //beq
       7'b0010011: imm_src_o = 3'b000;  //I-type ALU
       7'b1101111: imm_src_o = 3'b011;  //jal
